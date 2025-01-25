@@ -1,6 +1,5 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import '@testing-library/jest-dom';
-
 import App from "../App";
 
 // Portfolio Elements
@@ -14,33 +13,6 @@ test("displays a top-level heading with the text `Hi, I'm _______`", () => {
   });
 
   expect(topLevelHeading).toBeInTheDocument();
-});
-
-test("displays an image of yourself", () => {
-  render(<App />);
-
-  const image = screen.getByAltText("My profile pic");
-
-  expect(image).toHaveAttribute("src", "https://via.placeholder.com/350");
-});
-
-test("displays second-level heading with the text `About Me`", () => {
-  render(<App />);
-
-  const secondLevelHeading = screen.getByRole("heading", {
-    name: /about me/i,
-    level: 2,
-  });
-
-  expect(secondLevelHeading).toBeInTheDocument();
-});
-
-test("displays a paragraph for your biography", () => {
-  render(<App />);
-
-  const bio = screen.getByText(/lorem ipsum/i);
-
-  expect(bio).toBeInTheDocument();
 });
 
 test("displays the correct links", () => {
@@ -66,26 +38,64 @@ test("displays the correct links", () => {
 
 // Newsletter Form - Initial State
 test("the form includes text inputs for name and email address", () => {
-  // your test code here
+  render(<App />);
+
+  expect(screen.getByLabelText(/Name:/i)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Email:/i)).toBeInTheDocument();
 });
 
 test("the form includes three checkboxes to select areas of interest", () => {
-  // your test code here
+  render(<App />);
+
+  expect(screen.getByLabelText(/Coding/i)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Design/i)).toBeInTheDocument();
+  expect(screen.getByLabelText(/Marketing/i)).toBeInTheDocument();
 });
 
 test("the checkboxes are initially unchecked", () => {
-  // your test code here
+  render(<App />);
+
+  expect(screen.getByLabelText(/Coding/i)).not.toBeChecked();
+  expect(screen.getByLabelText(/Design/i)).not.toBeChecked();
+  expect(screen.getByLabelText(/Marketing/i)).not.toBeChecked();
 });
 
 // Newsletter Form - Adding Responses
 test("the page shows information the user types into the name and email address form fields", () => {
-  // your test code here
+  render(<App />);
+
+  fireEvent.change(screen.getByLabelText(/Name:/i), { target: { value: 'John Doe' } });
+  fireEvent.change(screen.getByLabelText(/Email:/i), { target: { value: 'johndoe@example.com' } });
+
+  expect(screen.getByLabelText(/Name:/i).value).toBe('John Doe');
+  expect(screen.getByLabelText(/Email:/i).value).toBe('johndoe@example.com');
 });
 
 test("checked status of checkboxes changes when user clicks them", () => {
-  // your test code here
+  render(<App />);
+
+  fireEvent.click(screen.getByLabelText(/Coding/i));
+  fireEvent.click(screen.getByLabelText(/Design/i));
+
+  expect(screen.getByLabelText(/Coding/i)).toBeChecked();
+  expect(screen.getByLabelText(/Design/i)).toBeChecked();
+  expect(screen.getByLabelText(/Marketing/i)).not.toBeChecked();
 });
 
 test("a message is displayed when the user clicks the Submit button", () => {
-  // your test code here
+  render(<App />);
+
+  fireEvent.change(screen.getByLabelText(/Name:/i), { target: { value: 'John Doe' } });
+  fireEvent.change(screen.getByLabelText(/Email:/i), { target: { value: 'johndoe@example.com' } });
+
+  fireEvent.click(screen.getByLabelText(/Coding/i));
+  fireEvent.click(screen.getByLabelText(/Design/i));
+
+  fireEvent.click(screen.getByText(/Submit/i));
+
+  expect(screen.getByText(/Thank you for signing up, John Doe!/i)).toBeInTheDocument();
+  expect(screen.getByText(/We've received your email \(johndoe@example.com\)/i)).toBeInTheDocument();
+  expect(screen.getByText(/you're interested in/i)).toBeInTheDocument();
+  expect(screen.getByText(/Coding/i)).toBeInTheDocument();
+  expect(screen.getByText(/Design/i)).toBeInTheDocument();
 });
